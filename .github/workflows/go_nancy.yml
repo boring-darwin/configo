@@ -1,0 +1,56 @@
+name: Nancy
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches:
+      - develop
+  push:
+    branches:
+      - main
+      - develop
+      - hotfix/*
+
+jobs:
+  nancy:
+    name: Check Nancy
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Fix up git URLs
+        run: |
+          git config --global --add url."https://${{ secrets.BLOB }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+          git config --global --add url."https://${{ secrets.BLOB }}:x-oauth-basic@github.com/".insteadOf "git@github.com:"
+
+      - name: Check out code
+        uses: actions/checkout@v4
+        timeout-minutes: 5
+        with:
+          fetch-depth: 150
+          submodules: true
+          token: ${{ secrets.BLOB }}
+          
+      - name: WriteGoList
+        run: go list -json -m all > go.list
+
+      - name: Get cache keys
+        id: get-date
+        run: |
+          echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+      - name: Cache nancy_cache
+        id: mock-cache
+        uses: actions/cache@v3
+        timeout-minutes: 5
+        with:
+          path: ./nancy_cache
+          key: nancy-${{ steps.get-date.outputs.date }}
+          restore-keys: |
+            nancy
+
+      - name: Nancy security scanning
+        uses: sonatype-nexus-community/nancy-github-action@main
+        with:
+          # We pin the version of nancy, so that broken nancy releases don't break build in unexpeected ways
+          nancyVersion: "v1.0.42"
+          nancyCommand: sleuth --db-cache-path ./nancy_cache
