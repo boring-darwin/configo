@@ -1,0 +1,36 @@
+name: Develop - Build + Tests
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches:
+      - develop
+
+jobs:
+    checks:
+        name: Static Code checks
+        runs-on: ubuntu-22.04
+        # needs: matrix
+        timeout-minutes: 15
+       
+        steps:
+          - name: Fix up git URLs
+            run: |
+              git config --global --add url."https://${{ secrets.BLOB }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+              git config --global --add url."https://${{ secrets.BLOB }}:x-oauth-basic@github.com/".insteadOf "git@github.com:"
+    
+    
+          - name: Set up Go
+            id: go
+            timeout-minutes: 10
+            uses: actions/setup-go@v3
+            with:
+              go-version: '1.20'
+              cache: true
+             
+          - name: Setup
+            run: |
+              export PATH=$PATH:/home/runner/go/bin
+          - name: Setup
+            run: |
+              make test
+               
