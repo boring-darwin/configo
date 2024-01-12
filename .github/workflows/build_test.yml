@@ -13,7 +13,6 @@ jobs:
     checks:
         name: Static Code checks
         runs-on: ubuntu-22.04
-        # needs: matrix
         timeout-minutes: 15
        
         steps:
@@ -34,6 +33,11 @@ jobs:
           - name: Setup
             run: |
               export PATH=$PATH:/home/runner/go/bin
+          
+          - name: Check out code
+            uses: actions/checkout@v4
+            timeout-minutes: 5
+          
           - name: Setup
             run: |
               make test
