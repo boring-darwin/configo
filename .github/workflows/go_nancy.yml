@@ -17,18 +17,18 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      # - name: Fix up git URLs
-      #   run: |
-      #     git config --global --add url."https://${{ secrets }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
-      #     git config --global --add url."https://${{ secrets }}:x-oauth-basic@github.com/".insteadOf "git@github.com:"
+      - name: Fix up git URLs
+        run: |
+          git config --global --add url."https://${{ secrets.BLOB }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+          git config --global --add url."https://${{ secrets.BLOB }}:x-oauth-basic@github.com/".insteadOf "git@github.com:"
 
       - name: Check out code
         uses: actions/checkout@v4
-        # timeout-minutes: 5
+        timeout-minutes: 5
         # with:
         #   fetch-depth: 150
         #   submodules: true
-        #   token: ${{ secrets }}
+        #   token: ${{ secrets.BLOB }}
           
       - name: WriteGoList
         run: go list -json -m all > go.list
